@@ -1,0 +1,7 @@
+# CreativeTabs
+itemGroup.projectscion.general=Project Scion
+
+# Items
+item.projectscion.toolhandle.name=Tool Handle
+item.projectscion.ironminingtool.name=Iron Mining Drill
+item.projectscion.diamondminingtool.name=Diamond Mining Drill
