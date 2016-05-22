@@ -17,8 +17,13 @@ public abstract class TileEntityFarm extends TileEntityInventoryBase {
         this.area.setFarm(this);
     }
 
-    public BlockPos getArea() {
+    public BlockPos getAreaPo() {
 
         return area.getPos();
+    }
+
+    public TileEntityAreaDefinition getArea() {
+
+        return area;
     }
 }

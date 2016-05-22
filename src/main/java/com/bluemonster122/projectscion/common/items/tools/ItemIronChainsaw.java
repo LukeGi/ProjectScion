@@ -22,7 +22,7 @@ import java.util.Stack;
 /**
  * Created by Blue <boo122333@gmail.com>.
  */
-public class ItemIronChainsaw extends ItemBase implements IProvideEvent{
+public class ItemIronChainsaw extends ItemBase implements IProvideEvent {
 
     public ItemIronChainsaw() {
 
@@ -56,7 +56,6 @@ public class ItemIronChainsaw extends ItemBase implements IProvideEvent{
         return material == Material.leaves || material == Material.wood;
     }
 
-
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void startBreak(net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed event) {
 
@@ -72,54 +71,68 @@ public class ItemIronChainsaw extends ItemBase implements IProvideEvent{
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void breakBlock(BlockEvent.BreakEvent event) {
 
-        World world = event.getWorld();
-        BlockPos pos = event.getPos();
-        IBlockState state = event.getState();
         if (event.getPlayer().getHeldItemMainhand() != null && event.getPlayer().getHeldItemMainhand().getItem() == ModItems.IRON_CHAINSAW.getItem()) {
-            if (state.getBlock().isWood(world, pos)) { // ALL CONDITIONS MET BY HERE
-                List<BlockPos> wood = new ArrayList<>();
-                Stack<BlockPos> toVisit = new Stack<>();
-                toVisit.push(pos);
-                while (!toVisit.isEmpty()) {
-                    BlockPos current = toVisit.pop();
-                    wood.add(current);
-                    for (int i = -4; i < 5; i++) {
-                        for (int j = -4; j < 5; j++) {
-                            for (int k = -4; k < 5; k++) {
-                                BlockPos element = current.add(i, j, k);
-                                IBlockState elementState = world.getBlockState(element);
-                                if (!wood.contains(element) && !toVisit.contains(element) && elementState.getBlock().isWood(world, element)) {
-                                    toVisit.push(element);
-                                }
+            event.setCanceled(breakWood(event.getWorld(), event.getPlayer(), event.getPos(), event.getState()));
+        }
+    }
+
+    public static boolean breakWood(World world, EntityPlayer player, BlockPos pos, IBlockState state) {
+
+        if (state.getBlock().isWood(world, pos)) {
+            List<BlockPos> wood = getSortedWoodList(pos, world);
+            if (!wood.isEmpty()) {
+                if (player.isSneaking()) {
+                    for (int i = 0; i < 10 && !wood.isEmpty(); i++) {
+                        BlockPos currentPos = wood.get(0);
+                        wood.remove(0);
+                        InventoryHelper.breakBlockIntoPlayerInv(world, currentPos, player.getHeldItemMainhand(), player);
+                        player.getHeldItemMainhand().damageItem(1, player);
+                    }
+                    return true;
+                } else {
+                    BlockPos currentPos = wood.get(0);
+                    wood.remove(0);
+                    InventoryHelper.breakBlockIntoPlayerInv(world, currentPos, player.getHeldItemMainhand(), player);
+                    player.getHeldItemMainhand().damageItem(1, player);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static List<BlockPos> getSortedWoodList(BlockPos pos, World world) {
+
+        if (world.getBlockState(pos).getBlock().isWood(world, pos)) {
+            List<BlockPos> wood = new ArrayList<>();
+            Stack<BlockPos> toVisit = new Stack<>();
+            toVisit.push(pos);
+            while (!toVisit.isEmpty()) {
+                BlockPos current = toVisit.pop();
+                wood.add(current);
+                for (int i = -4; i < 5; i++) {
+                    for (int j = -4; j < 5; j++) {
+                        for (int k = -4; k < 5; k++) {
+                            BlockPos element = current.add(i, j, k);
+                            IBlockState elementState = world.getBlockState(element);
+                            if (!wood.contains(element) && !toVisit.contains(element) && elementState.getBlock().isWood(world, element)) {
+                                toVisit.push(element);
                             }
                         }
                     }
                 }
-                wood.sort((a, b) -> {
-                    if (a.distanceSq(pos) < b.distanceSq(pos)) {
-                        return 1;
-                    } else if (a.distanceSq(pos) == b.distanceSq(pos)) {
-                        return 0;
-                    } else if (a.distanceSq(pos) > b.distanceSq(pos))
-                        return -1;
-                    return 0;
-                });
-                if (event.getPlayer().isSneaking()) {
-                    for (int i = 0; i < 10 && !wood.isEmpty(); i++) {
-                        BlockPos currentPos = wood.get(0);
-                        wood.remove(0);
-                        InventoryHelper.breakBlockIntoPlayerInv(world, currentPos, event.getPlayer().getHeldItemMainhand(), event.getPlayer());
-                        event.getPlayer().getHeldItemMainhand().damageItem(1, event.getPlayer());
-                    }
-                    event.setCanceled(true);
-                } else {
-                    BlockPos currentPos = wood.get(0);
-                    wood.remove(0);
-                    InventoryHelper.breakBlockIntoPlayerInv(world, currentPos, event.getPlayer().getHeldItemMainhand(), event.getPlayer());
-                    event.getPlayer().getHeldItemMainhand().damageItem(1, event.getPlayer());
-                    event.setCanceled(true);
-                }
             }
+            wood.sort((a, b) -> {
+                if (a.distanceSq(pos) < b.distanceSq(pos)) {
+                    return 1;
+                } else if (a.distanceSq(pos) == b.distanceSq(pos)) {
+                    return 0;
+                } else if (a.distanceSq(pos) > b.distanceSq(pos))
+                    return -1;
+                return 0;
+            });
+            return wood;
         }
+        return null;
     }
 }

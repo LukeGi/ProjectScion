@@ -1,9 +1,9 @@
 package com.bluemonster122.projectscion.common.tileentities;
 
 import com.bluemonster122.projectscion.common.tileentities.farm.TileEntityFarm;
-import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
@@ -18,7 +18,14 @@ public class TileEntityAreaDefinition extends TileEntityBase {
     private TileEntityAreaDefinition master = this;
     private boolean isMaster = false;
     private BlockPos center = pos;
+    private BlockPos[] inside = null;
     private TileEntityFarm farm;
+    private AxisAlignedBB aabb;
+
+    public AxisAlignedBB getAABB() {
+
+        return aabb;
+    }
 
     @Override
     public void initMachineData() {
@@ -62,7 +69,50 @@ public class TileEntityAreaDefinition extends TileEntityBase {
                 zminus = tilePos.getZ();
             }
         }
-        setCenter(new BlockPos((xminus + xplus) / 2, pos.getY(), (zminus + zplus) / 2));
+        getMaster().setCenter(new BlockPos((xminus + xplus) / 2, pos.getY(), (zminus + zplus) / 2));
+        getMaster().setAABB(new AxisAlignedBB(xplus + 10, pos.getY(), zplus + 10, xminus - 10, pos.getY() + 5, zminus - 10));
+        List<BlockPos> insiders = new ArrayList<>();
+        int y = pos.getY() + 1;
+        for (int x = xminus; x <= xplus; x++) {
+            for (int z = zminus; z <= zplus; z++) {
+                insiders.add(new BlockPos(x, y, z));
+            }
+        }
+        BlockPos[] surrounding = new BlockPos[insiders.size()];
+        for (int i = insiders.size() - 1; i >= 0; i--) {
+            surrounding[i] = insiders.get(i);
+        }
+        getMaster().setInside(surrounding);
+    }
+
+    public BlockPos[] getInside() {
+
+        return inside;
+    }
+
+    @Override
+    public void onChunkLoad() {
+
+        initMachineData();
+        super.onChunkLoad();
+    }
+
+    public void setInside(BlockPos[] inside) {
+
+        if (isMaster()) {
+            this.inside = inside;
+        } else {
+            getMaster().setInside(inside);
+        }
+    }
+
+    public void setAABB(AxisAlignedBB aabb) {
+
+        if (isMaster()) {
+            this.aabb = aabb;
+        } else {
+            getMaster().setAABB(aabb);
+        }
     }
 
     @Override
@@ -74,6 +124,10 @@ public class TileEntityAreaDefinition extends TileEntityBase {
             for (EnumFacing facing : EnumFacing.HORIZONTALS)
                 if (worldObj.getTileEntity(pos.offset(facing)) != null && worldObj.getTileEntity(pos.offset(facing)) instanceof TileEntityAreaDefinition) {
                     ((TileEntityAreaDefinition) worldObj.getTileEntity(pos.offset(facing))).setMaster();
+                    getMaster().setInside(inside);
+                    getMaster().setCenter(center);
+                    getMaster().setFarm(farm);
+                    getMaster().setAABB(aabb);
                     break;
                 }
         }
@@ -131,5 +185,10 @@ public class TileEntityAreaDefinition extends TileEntityBase {
     public void setFarm(TileEntityFarm farm) {
 
         this.farm = farm;
+    }
+
+    public TileEntityFarm getFarm() {
+
+        return isMaster() ? farm : getMaster().getFarm();
     }
 }

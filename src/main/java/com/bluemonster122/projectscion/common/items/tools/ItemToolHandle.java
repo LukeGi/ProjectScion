@@ -49,29 +49,30 @@ public class ItemToolHandle extends ItemBase implements IProvideEvent {
                     return EnumActionResult.SUCCESS;
                 } else*/
                 if (above == Blocks.stone) {
-                    changeItemTo(worldIn, pos, stack, ModItems.DIAMOND_MINING_TOOL.getItem(), 2);
+                    changeItemTo(worldIn, pos, stack, ModItems.DIAMOND_MINING_TOOL.getStack(1), 2);
                     return EnumActionResult.SUCCESS;
                 }
             } else {
                 if (above.isWood(worldIn, pos.up())) {
-                    changeItemTo(worldIn, pos, stack, ModItems.IRON_CHAINSAW.getItem(), 1);
+                    changeItemTo(worldIn, pos, stack, ModItems.IRON_CHAINSAW.getStack(1), 1);
                     return EnumActionResult.SUCCESS;
                 } else if (above == Blocks.stone) {
-                    changeItemTo(worldIn, pos, stack, ModItems.IRON_MINING_TOOL.getItem(), 1);
+                    changeItemTo(worldIn, pos, stack, ModItems.IRON_MINING_TOOL.getStack(1), 1);
                     return EnumActionResult.SUCCESS;
                 }
             }
         }
         if (worldIn.getBlockState(pos).getBlock() == ModBlocks.AREA_DEFINITION.getBlock()) {
-            changeItemTo(worldIn, pos, stack, ModItems.AREA_DESIGNATOR.getItem(), 0);
+            changeItemTo(worldIn, pos, stack, ModItems.AREA_DESIGNATOR.getStack(1), 0);
             return EnumActionResult.SUCCESS;
         }
         return EnumActionResult.PASS;
     }
 
-    private void changeItemTo(World worldIn, BlockPos pos, ItemStack stack, Item item, int i) {
+    public static void changeItemTo(World worldIn, BlockPos pos, ItemStack stack, ItemStack item, int i) {
 
-        stack.setItem(item);
+        stack.setItem(item.getItem());
+        stack.stackSize = item.stackSize;
         worldIn.destroyBlock(pos, false);
         if (i >= 1) {
             worldIn.destroyBlock(pos.up(), false);
@@ -90,7 +91,7 @@ public class ItemToolHandle extends ItemBase implements IProvideEvent {
         ItemStack heldStack = event.getEntityPlayer().getHeldItemMainhand();
         if (heldStack != null && heldStack.getItem() == Items.stick) {
             if (event.getWorld().getBlockState(event.getPos()).getBlock() == Blocks.lapis_block && heldStack.stackSize == 1) {
-                changeItemTo(event.getWorld(), event.getPos(), heldStack, ModItems.TOOL_HANDLE.getItem(), 0);
+                changeItemTo(event.getWorld(), event.getPos(), heldStack, ModItems.TOOL_HANDLE.getStack(1), 0);
                 event.setCanceled(true);
             }
         }
