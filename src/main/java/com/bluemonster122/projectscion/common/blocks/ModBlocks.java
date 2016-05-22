@@ -1,30 +1,33 @@
 package com.bluemonster122.projectscion.common.blocks;
 
-import com.bluemonster122.projectscion.common.blocks.sample.BlockSample;
+import com.bluemonster122.projectscion.common.blocks.farms.BlockFarm;
+import com.bluemonster122.projectscion.common.blocks.farms.BlockTreeFarm;
 import com.bluemonster122.projectscion.common.util.RegistrationHelper;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 
-public enum Blocks {
-    SAMPLE_BLOCK(BlockSample.class),
+public enum ModBlocks {
+    FARM(BlockFarm.class),
+    TREE_FARM(BlockTreeFarm.class),
+    AREA_DEFINITION(BlockAreaDefinition.class),
     ;
 
     private final Class<? extends BlockBase> blockClass;
     private final Class<? extends ItemBlock> itemBlockClass;
     private Block block;
 
-    Blocks(Class<? extends BlockBase> blockClass) {
+    ModBlocks(Class<? extends BlockBase> blockClass) {
         this(blockClass, ItemBlock.class);
     }
 
-    Blocks(Class<? extends BlockBase> blockClass, Class<? extends ItemBlock> itemBlockClass) {
+    ModBlocks(Class<? extends BlockBase> blockClass, Class<? extends ItemBlock> itemBlockClass) {
         this.blockClass = blockClass;
         this.itemBlockClass = itemBlockClass;
     }
 
     public static void registerBlocks() {
-        for (Blocks block : Blocks.values()) {
+        for (ModBlocks block : ModBlocks.values()) {
             block.registerBlock();
         }
     }

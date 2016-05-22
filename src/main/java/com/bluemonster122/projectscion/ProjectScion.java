@@ -1,15 +1,19 @@
 package com.bluemonster122.projectscion;
 
-import com.bluemonster122.projectscion.common.EventHandler;
 import com.bluemonster122.projectscion.common.config.Config;
 import com.bluemonster122.projectscion.common.integrations.IntegrationsManager;
+import com.bluemonster122.projectscion.common.items.ModItems;
+import com.bluemonster122.projectscion.common.items.tools.ItemToolHandle;
 import com.bluemonster122.projectscion.common.util.LogHelper;
 import com.bluemonster122.projectscion.proxy.IProxy;
 import com.google.common.base.Stopwatch;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -31,7 +35,6 @@ public class ProjectScion {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
 
-        MinecraftForge.EVENT_BUS.register(new EventHandler());
         final Stopwatch stopwatch = Stopwatch.createStarted();
         LogHelper.info("Pre Initialization (Started)");
         proxy.registerConfiguration(event.getSuggestedConfigurationFile());

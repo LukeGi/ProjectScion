@@ -1,17 +1,24 @@
-package com.bluemonster122.projectscion.common.tileentities.sample;
+package com.bluemonster122.projectscion.common.tileentities.farm;
 
 import com.bluemonster122.projectscion.common.inventory.InternalInventory;
 import com.bluemonster122.projectscion.common.inventory.InventoryOperation;
+import com.bluemonster122.projectscion.common.tileentities.TileEntityAreaDefinition;
 import com.bluemonster122.projectscion.common.tileentities.TileEntityInventoryBase;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 
-public class TileEntitySample extends TileEntityInventoryBase {
-    private InternalInventory internalInventory = new InternalInventory(this, 10);
+/**
+ * Created by Blue <boo122333@gmail.com>.
+ */
+public class TileEntityTreeFarm extends TileEntityFarm {
+
+    private InternalInventory internalInventory = new InternalInventory(this, 100);
 
     @Override
     public IInventory getInternalInventory() {
+
         return internalInventory;
     }
 
@@ -22,16 +29,13 @@ public class TileEntitySample extends TileEntityInventoryBase {
 
     @Override
     public int[] getAccessibleSlotsBySide(EnumFacing side) {
+
         return new int[0];
     }
 
     @Override
     public ItemStack removeStackFromSlot(int index) {
-        return null;
-    }
 
-    @Override
-    public boolean canBeRotated() {
-        return true;
+        return null;
     }
 }

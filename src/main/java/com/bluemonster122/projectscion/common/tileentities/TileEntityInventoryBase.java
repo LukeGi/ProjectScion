@@ -23,7 +23,7 @@ public abstract class TileEntityInventoryBase extends TileEntityBase implements 
             inventoryCustom.readFromNBT(nbtTagCompound);
         } else {
             IInventory inventory = this.getInternalInventory();
-            NBTTagCompound tagCompound = nbtTagCompound.getCompoundTag("Items");
+            NBTTagCompound tagCompound = nbtTagCompound.getCompoundTag("ModItems");
             for (int i = 0; i < inventory.getSizeInventory(); i++) {
                 NBTTagCompound item = tagCompound.getCompoundTag("items" + i);
                 inventory.setInventorySlotContents(i, ItemStack.loadItemStackFromNBT(item));
@@ -48,7 +48,7 @@ public abstract class TileEntityInventoryBase extends TileEntityBase implements 
                     itemStack.writeToNBT(item);
                 tagCompound.setTag("items" + i, item);
             }
-            nbtTagCompound.setTag("Items", tagCompound);
+            nbtTagCompound.setTag("ModItems", tagCompound);
         }
     }
 

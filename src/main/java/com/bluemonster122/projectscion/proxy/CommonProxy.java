@@ -1,12 +1,12 @@
 package com.bluemonster122.projectscion.proxy;
 
 import com.bluemonster122.projectscion.ProjectScion;
-import com.bluemonster122.projectscion.common.blocks.Blocks;
+import com.bluemonster122.projectscion.common.blocks.ModBlocks;
 import com.bluemonster122.projectscion.common.config.Config;
+import com.bluemonster122.projectscion.common.items.ModItems;
 import com.bluemonster122.projectscion.common.util.IProvideEvent;
 import com.bluemonster122.projectscion.common.util.IProvideRecipe;
 import com.bluemonster122.projectscion.common.util.IProvideSmelting;
-import com.bluemonster122.projectscion.common.items.Items;
 import com.bluemonster122.projectscion.client.gui.GuiHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -16,22 +16,22 @@ import java.io.File;
 public abstract class CommonProxy implements IProxy {
     @Override
     public void registerBlocks() {
-        Blocks.registerBlocks();
+        ModBlocks.registerBlocks();
     }
 
     @Override
     public void registerItems() {
-        Items.registerItems();
+        ModItems.registerItems();
     }
 
     @Override
     public void registerFurnaceRecipes() {
-        for (Items item : Items.values()) {
+        for (ModItems item : ModItems.values()) {
             if (item.getItem() instanceof IProvideSmelting)
                 ((IProvideSmelting) item.getItem()).RegisterSmelting();
         }
 
-        for (Blocks block : Blocks.values()) {
+        for (ModBlocks block : ModBlocks.values()) {
             if (block.getBlock() instanceof IProvideSmelting)
                 ((IProvideSmelting) block.getBlock()).RegisterSmelting();
         }
@@ -39,12 +39,12 @@ public abstract class CommonProxy implements IProxy {
 
     @Override
     public void registerRecipes() {
-        for (Items item : Items.values()) {
+        for (ModItems item : ModItems.values()) {
             if (item.getItem() instanceof IProvideRecipe)
                 ((IProvideRecipe) item.getItem()).RegisterRecipes();
         }
 
-        for (Blocks block : Blocks.values()) {
+        for (ModBlocks block : ModBlocks.values()) {
             if (block.getBlock() instanceof IProvideRecipe)
                 ((IProvideRecipe) block.getBlock()).RegisterRecipes();
         }
@@ -52,12 +52,12 @@ public abstract class CommonProxy implements IProxy {
 
     @Override
     public void registerEvents() {
-        for (Items item : Items.values()) {
+        for (ModItems item : ModItems.values()) {
             if (item.getItem() instanceof IProvideEvent)
                 MinecraftForge.EVENT_BUS.register(item.getItem());
         }
 
-        for (Blocks block : Blocks.values()) {
+        for (ModBlocks block : ModBlocks.values()) {
             if (block.getBlock() instanceof IProvideEvent)
                 MinecraftForge.EVENT_BUS.register(block.getBlock());
         }

@@ -4,12 +4,12 @@ import java.io.File;
 
 public interface IProxy {
     /**
-     * Register Blocks
+     * Register ModBlocks
      */
     void registerBlocks();
 
     /**
-     * Register Items
+     * Register ModItems
      */
     void registerItems();
 
