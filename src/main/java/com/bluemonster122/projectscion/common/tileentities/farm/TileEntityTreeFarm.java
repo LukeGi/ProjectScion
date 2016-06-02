@@ -1,6 +1,5 @@
 package com.bluemonster122.projectscion.common.tileentities.farm;
 
-import com.bluemonster122.projectscion.common.inventory.InternalInventory;
 import com.bluemonster122.projectscion.common.inventory.InventoryOperation;
 import com.bluemonster122.projectscion.common.items.tools.ItemIronChainsaw;
 import com.bluemonster122.projectscion.common.util.InventoryHelper;
@@ -10,11 +9,12 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.ArrayList;
@@ -25,8 +25,24 @@ import java.util.List;
  */
 public class TileEntityTreeFarm extends TileEntityFarm implements ITickable {
 
-    private InternalInventory internalInventory = new InternalInventory(this, 27);
+    private ItemStackHandler internalInventory = new ItemStackHandler(27);
     private List<BlockPos> toChop = new ArrayList<>();
+
+    public void save(NBTTagCompound nbt) {
+
+        if (getAreaPo() != null) {
+            nbt.setInteger("areaX", getAreaPo().getX());
+            nbt.setInteger("areaY", getAreaPo().getY());
+            nbt.setInteger("areaZ", getAreaPo().getZ());
+        }
+    }
+
+    public void load(NBTTagCompound nbt) {
+
+        if (nbt.hasKey("areaX") && nbt.hasKey("areaY") && nbt.hasKey("areaZ")) {
+            setArea(new BlockPos(nbt.getInteger("areaX"), nbt.getInteger("areaY"), nbt.getInteger("areaZ")));
+        }
+    }
 
     @Override
     public void update() {
@@ -64,8 +80,8 @@ public class TileEntityTreeFarm extends TileEntityFarm implements ITickable {
             }
             if (getArea().getInside() != null && worldObj.getTotalWorldTime() % 100 == 40) {
                 // CUT BLOCKS
-                for (int i = getArea().getInside().length - 1; i >= 0; i--) {
-                    List<BlockPos> positiosn = ItemIronChainsaw.getSortedWoodList(getArea().getInside()[i], worldObj);
+                for (int i = getArea().getInside().size() - 1; i >= 0; i--) {
+                    List<BlockPos> positiosn = ItemIronChainsaw.getSortedWoodList(getArea().getInside().get(i), worldObj);
                     if (positiosn != null) {
                         toChop.addAll(positiosn);
                     }
@@ -73,8 +89,8 @@ public class TileEntityTreeFarm extends TileEntityFarm implements ITickable {
             }
             if (getArea().getInside() != null && worldObj.getTotalWorldTime() % 10 == 1) {
                 //PLANT SAPLINGS
-                for (int s = getArea().getInside().length - 1; s >= 0; s--) {
-                    BlockPos p = getArea().getInside()[s];
+                for (int s = getArea().getInside().size() - 1; s >= 0; s--) {
+                    BlockPos p = getArea().getInside().get(s);
                     Block block = worldObj.getBlockState(p).getBlock();
                     TileEntity tile = worldObj.getTileEntity(pos);
                     if (!(tile instanceof IInventory))
@@ -111,7 +127,7 @@ public class TileEntityTreeFarm extends TileEntityFarm implements ITickable {
     }
 
     @Override
-    public IInventory getInternalInventory() {
+    public ItemStackHandler getInternalInventory() {
 
         return internalInventory;
     }
@@ -131,5 +147,19 @@ public class TileEntityTreeFarm extends TileEntityFarm implements ITickable {
     public ItemStack removeStackFromSlot(int index) {
 
         return null;
+    }
+
+    @Override
+    public void writeToNBT(NBTTagCompound nbtTagCompound) {
+
+        super.writeToNBT(nbtTagCompound);
+        save(nbtTagCompound);
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound nbtTagCompound) {
+
+        super.readFromNBT(nbtTagCompound);
+        load(nbtTagCompound);
     }
 }

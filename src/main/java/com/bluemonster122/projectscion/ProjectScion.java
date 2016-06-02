@@ -47,6 +47,7 @@ public class ProjectScion {
         IntegrationsManager.instance().index();
         IntegrationsManager.instance().preInit();
         LogHelper.info("Pre Initialization (Ended after " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms)");
+        stopwatch.stop();
     }
 
     @Mod.EventHandler
@@ -57,6 +58,7 @@ public class ProjectScion {
         proxy.registerRecipes();
         IntegrationsManager.instance().init();
         LogHelper.info("Initialization (Ended after " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms)");
+        stopwatch.stop();
     }
 
     @Mod.EventHandler
@@ -66,6 +68,7 @@ public class ProjectScion {
         LogHelper.info("Post Initialization (Started)");
         IntegrationsManager.instance().postInit();
         LogHelper.info("Post Initialization (Ended after " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms)");
+        stopwatch.stop();
     }
 
     @SubscribeEvent

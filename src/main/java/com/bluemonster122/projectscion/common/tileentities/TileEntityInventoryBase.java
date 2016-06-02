@@ -12,25 +12,18 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
 
 public abstract class TileEntityInventoryBase extends TileEntityBase implements ISidedInventory, IInventoryHandler {
-    public abstract IInventory getInternalInventory();
+    public abstract ItemStackHandler getInternalInventory();
 
     @Override
     public void readFromNBT(NBTTagCompound nbtTagCompound) {
         super.readFromNBT(nbtTagCompound);
 
-        if (getInternalInventory() instanceof IInventoryCustom) {
-            IInventoryCustom inventoryCustom = (IInventoryCustom) getInternalInventory();
-            inventoryCustom.readFromNBT(nbtTagCompound);
-        } else {
-            IInventory inventory = this.getInternalInventory();
-            NBTTagCompound tagCompound = nbtTagCompound.getCompoundTag("ModItems");
-            for (int i = 0; i < inventory.getSizeInventory(); i++) {
-                NBTTagCompound item = tagCompound.getCompoundTag("items" + i);
-                inventory.setInventorySlotContents(i, ItemStack.loadItemStackFromNBT(item));
-            }
+        if (getInternalInventory() != null) {
+            getInternalInventory().deserializeNBT(nbtTagCompound.getCompoundTag("inventory"));
         }
     }
 
@@ -38,41 +31,30 @@ public abstract class TileEntityInventoryBase extends TileEntityBase implements 
     public void writeToNBT(NBTTagCompound nbtTagCompound) {
         super.writeToNBT(nbtTagCompound);
 
-        if (getInternalInventory() instanceof IInventoryCustom) {
-            IInventoryCustom inventoryCustom = (IInventoryCustom) getInternalInventory();
-            inventoryCustom.writeToNBT(nbtTagCompound);
-        } else {
-            IInventory inventory = this.getInternalInventory();
-            NBTTagCompound tagCompound = new NBTTagCompound();
-            for (int i = 0; i < inventory.getSizeInventory(); i++) {
-                NBTTagCompound item = new NBTTagCompound();
-                ItemStack itemStack = this.getStackInSlot(i);
-                if (itemStack != null)
-                    itemStack.writeToNBT(item);
-                tagCompound.setTag("items" + i, item);
-            }
-            nbtTagCompound.setTag("ModItems", tagCompound);
+        if (getInternalInventory() != null) {
+            nbtTagCompound.setTag("inventory", getInternalInventory().serializeNBT());
         }
+
     }
 
     @Override
     public int getSizeInventory() {
-        return this.getInternalInventory().getSizeInventory();
+        return getInternalInventory().getSlots();
     }
 
     @Override
     public ItemStack getStackInSlot(int slot) {
-        return this.getInternalInventory().getStackInSlot(slot);
+        return getInternalInventory().getStackInSlot(slot);
     }
 
     @Override
     public ItemStack decrStackSize(int i, int j) {
-        return this.getInternalInventory().decrStackSize(i, j);
+        return getInternalInventory().extractItem(i, j,false);
     }
 
     @Override
     public void setInventorySlotContents(int slot, ItemStack itemStack) {
-        this.getInternalInventory().setInventorySlotContents(slot, itemStack);
+        getInternalInventory().setStackInSlot(slot, itemStack);
     }
 
     @Override

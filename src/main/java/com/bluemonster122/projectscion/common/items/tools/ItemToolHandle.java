@@ -1,33 +1,42 @@
 package com.bluemonster122.projectscion.common.items.tools;
 
+import com.bluemonster122.projectscion.ModInfo;
 import com.bluemonster122.projectscion.ProjectScionCreativeTabs;
 import com.bluemonster122.projectscion.common.blocks.ModBlocks;
 import com.bluemonster122.projectscion.common.items.ItemBase;
 import com.bluemonster122.projectscion.common.items.ModItems;
+import com.bluemonster122.projectscion.common.util.EnumHandleProperty;
 import com.bluemonster122.projectscion.common.util.IProvideEvent;
-import com.bluemonster122.projectscion.common.util.IProvideRecipe;
 import net.minecraft.block.Block;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.*;
 import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.List;
 
 /**
  * Created by Blue <boo122333@gmail.com>.
  */
 public class ItemToolHandle extends ItemBase implements IProvideEvent {
+
+    IProperty TYPE = PropertyEnum.create("type", EnumHandleProperty.class);
 
     public ItemToolHandle() {
 
@@ -35,6 +44,30 @@ public class ItemToolHandle extends ItemBase implements IProvideEvent {
         setCreativeTab(ProjectScionCreativeTabs.tabGeneral);
         setInternalName("toolhandle");
         setMaxStackSize(1);
+        setHasSubtypes(true);
+    }
+
+    @Override
+    public void getSubItems(Item id, CreativeTabs tab, List<ItemStack> list) {
+
+        for (EnumHandleProperty type : EnumHandleProperty.values()) {
+            list.add(new ItemStack(id, 1, type.ordinal()));
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void registerItemRenderer() {
+
+        for (int i = 0; i < EnumHandleProperty.values().length; i++) {
+            ModelLoader.setCustomModelResourceLocation(this, i, new ModelResourceLocation(String.format("%s:%s-%s", ModInfo.MOD_ID, resourcePath, EnumHandleProperty.values()[i].getName().toLowerCase()), "inventory"));
+        }
+    }
+
+    @Override
+    public String getUnlocalizedName(ItemStack stack) {
+
+        return super.getUnlocalizedName(stack) + "." + EnumHandleProperty.values()[stack.getItemDamage()].getName();
     }
 
     @Override
@@ -61,6 +94,11 @@ public class ItemToolHandle extends ItemBase implements IProvideEvent {
                     return EnumActionResult.SUCCESS;
                 }
             }
+            if (above == ModBlocks.UNOBTAINABLE_MATTER_BLOCK.getBlock()) {
+                if (worldIn.getBlockState(pos.up().up()).getBlock() == ModBlocks.UNOBTAINABLE_MATTER_BLOCK.getBlock()) {
+                    changeItemTo(worldIn, pos, stack, ModItems.UNOBTAINABLE_SWORD.getStack(1), 1);
+                }
+            }
         }
         if (worldIn.getBlockState(pos).getBlock() == ModBlocks.AREA_DEFINITION.getBlock()) {
             changeItemTo(worldIn, pos, stack, ModItems.AREA_DESIGNATOR.getStack(1), 0);
@@ -80,8 +118,8 @@ public class ItemToolHandle extends ItemBase implements IProvideEvent {
         if (i >= 2) {
             worldIn.destroyBlock(pos.up(2), false);
         }
-        for (int j = 0; j < 5 * i + 5; j++) {
-            worldIn.weatherEffects.add(new EntityLightningBolt(worldIn, pos.getX() + worldIn.rand.nextDouble(), pos.getY(), pos.getZ() + worldIn.rand.nextDouble(), true));
+        for (int j = 0; j < (5 * i) + 5; j++) {
+            worldIn.weatherEffects.add(new EntityLightningBolt(worldIn, pos.getX(), pos.getY(), pos.getZ(), true));
         }
     }
 
@@ -91,8 +129,13 @@ public class ItemToolHandle extends ItemBase implements IProvideEvent {
         ItemStack heldStack = event.getEntityPlayer().getHeldItemMainhand();
         if (heldStack != null && heldStack.getItem() == Items.stick) {
             if (event.getWorld().getBlockState(event.getPos()).getBlock() == Blocks.lapis_block && heldStack.stackSize == 1) {
-                changeItemTo(event.getWorld(), event.getPos(), heldStack, ModItems.TOOL_HANDLE.getStack(1), 0);
+                changeItemTo(event.getWorld(), event.getPos(), heldStack, ModItems.TOOL_HANDLE.getStack(1, 0), 0);
                 event.setCanceled(true);
+            }
+        }
+        if (heldStack != null && heldStack.getItem() == ModItems.DIAMOND_ROD.getItem()) {
+            if (event.getWorld().getBlockState(event.getPos()).getBlock() == ModBlocks.COMPRESSED_OBSIDIAN.getBlock() && heldStack.stackSize == 1) {
+                changeItemTo(event.getWorld(), event.getPos(), heldStack, ModItems.TOOL_HANDLE.getStack(1, 1), 0);
             }
         }
     }

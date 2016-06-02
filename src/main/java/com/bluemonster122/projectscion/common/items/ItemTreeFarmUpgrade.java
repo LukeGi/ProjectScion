@@ -29,7 +29,7 @@ public class ItemTreeFarmUpgrade extends ItemBase {
         if (worldIn.getBlockState(pos).getBlock() == ModBlocks.FARM.getBlock()) {
             if (worldIn.isRemote) {
                 for (int i = 0; i < 10; i++) {
-                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, pos.offset(facing).getX(), pos.offset(facing).getY() , pos.offset(facing).getZ(), 0, 0.01, 0, new int[0]);
+                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, pos.offset(facing).getX(), pos.offset(facing).getY() , pos.offset(facing).getZ(), 0, 0.01, 0);
                 }
             } else {
                 worldIn.setBlockState(pos, ModBlocks.TREE_FARM.getBlock().getDefaultState());

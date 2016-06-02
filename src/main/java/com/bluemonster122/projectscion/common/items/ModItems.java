@@ -11,38 +11,47 @@ public enum ModItems {
     DIAMOND_MINING_TOOL(ItemDiamondMiningTool.class),
     IRON_CHAINSAW(ItemIronChainsaw.class),
     TREE_FARM_UPGRADE(ItemTreeFarmUpgrade.class),
-    AREA_DESIGNATOR(ItemAreaDesignator.class),;
-
+    AREA_DESIGNATOR(ItemAreaDesignator.class),
+    UNOBTAINABLE_MATTER(ItemUnobtainableMatter.class),
+    UNOBTAINABLE_SWORD(ItemUnobtainableSword.class),
+    DIAMOND_ROD(ItemDiamondRod.class),;
     private final Class<? extends Item> itemClass;
     private Item item;
 
     ModItems(Class<? extends Item> itemClass) {
+
         this.itemClass = itemClass;
     }
 
     public static void registerItems() {
+
         for (ModItems i : ModItems.values()) {
             i.registerItem();
         }
     }
 
     public ItemStack getStack() {
+
         return new ItemStack(item);
     }
 
     public ItemStack getStack(int size) {
+
         return new ItemStack(item, size);
     }
 
     public ItemStack getStack(int size, int damage) {
+
         return new ItemStack(item, size, damage);
     }
 
     public Item getItem() {
+
         return this.item;
     }
 
     private void registerItem() {
+
         item = RegistrationHelper.registerItem(itemClass);
     }
 }
