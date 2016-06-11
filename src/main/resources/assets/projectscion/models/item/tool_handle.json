@@ -1,3 +1,7 @@
 {
-  "parent": "item/generated"
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "projectscion:items/tool_handle"
+  }
 }
+

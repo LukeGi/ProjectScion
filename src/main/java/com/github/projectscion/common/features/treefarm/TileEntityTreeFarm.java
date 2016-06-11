@@ -1,10 +1,13 @@
 package com.github.projectscion.common.features.treefarm;
 
+import com.github.projectscion.common.core.multiblock.TileEntityMultiblock;
 import com.github.projectscion.common.features.tools.ItemChainsaw;
 import com.mojang.realmsclient.util.Pair;
+import com.sun.istack.internal.NotNull;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSapling;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -26,7 +29,7 @@ import java.util.Random;
 /**
  * Created by Blue <boo122333@gmail.com>.
  */
-public class TileEntityTreeFarm extends TileEntity implements ITickable {
+public class TileEntityTreeFarm extends TileEntityMultiblock {
 
     public static final List<BlockPos> multiblock;
 
@@ -59,14 +62,6 @@ public class TileEntityTreeFarm extends TileEntity implements ITickable {
     private List<BlockPos> toChop = new ArrayList<>();
     private Pair<BlockPos, BlockPos> corners;
 
-    public boolean isFormed() {
-
-        return isFormed;
-    }
-
-    private boolean isFormed = false;
-    private boolean isFirstTime = true;
-
     public void save(NBTTagCompound nbt) {
 
         boolean saveCorners = corners != null;
@@ -92,19 +87,8 @@ public class TileEntityTreeFarm extends TileEntity implements ITickable {
     }
 
     @Override
-    public void update() {
-
-        if (isFirstTime) {
-            isFirstTime = false;
-            isFormed = checkFormation();
-        }
-        if (getWorld().getTotalWorldTime() % 100 == 0) {
-            isFormed = checkFormation();
-        }
-        /**
-         * If formed do stuff
-         */
-        if (isFormed && corners != null) {
+    public void function() {
+        if (corners != null) {
             if (getWorld().getTotalWorldTime() % 100 == 20) {
                 //SAPLINGS
                 List<BlockPos> blockPoses = getPositionsInsideCorners(corners);
@@ -194,76 +178,6 @@ public class TileEntityTreeFarm extends TileEntity implements ITickable {
                 worldObj.destroyBlock(blockPos, true);
             }
         }
-        //        if (getArea() != null) {
-        //            if (worldObj.getTotalWorldTime() % 100 == 20) {
-        //                // COLLECT DROPS
-        //                if (getArea().getAABB() != null) {
-        //                    List<ItemStack> acceptedDrops = new ArrayList<>();
-        //                    for (ItemStack itemStack : OreDictionary.getOres("treeSapling")) {
-        //                        acceptedDrops.add(itemStack);
-        //                    }
-        //                    for (ItemStack itemStack : OreDictionary.getOres("logWood")) {
-        //                        acceptedDrops.add(itemStack);
-        //                    }
-        //                    List<EntityItem> loots = worldObj.getEntitiesWithinAABB(EntityItem.class, getArea().getAABB());
-        //                    EntityItem item;
-        //                    for (int i = loots.size() - 1; i >= 0; i--) {
-        //                        item = loots.get(i);
-        //                        boolean remove = true;
-        //                        for (ItemStack acceptedDrop : acceptedDrops) {
-        //                            if (item.getEntityItem().getItem() == acceptedDrop.getItem()) {
-        //                                remove = false;
-        //                            }
-        //                        }
-        //                        if (remove) {
-        //                            loots.remove(i);
-        //                        }
-        //                    }
-        //                    for (EntityItem loot : loots) {
-        ////                        InventoryHelper.addItemStackToInventory(loot.getEntityItem(), this, 0, 99);
-        //                        loot.setDead();
-        //                    }
-        //                }
-        //            }
-        //            if (getArea().getInside() != null && worldObj.getTotalWorldTime() % 100 == 40) {
-        //                // CUT BLOCKS
-        //                for (int i = getArea().getInside().size() - 1; i >= 0; i--) {
-        //                    List<BlockPos> positiosn = ItemIronChainsaw.getSortedWoodList(getArea().getInside().get(i), worldObj);
-        //                    if (positiosn != null) {
-        //                        toChop.addAll(positiosn);
-        //                    }
-        //                }
-        //            }
-        //            if (getArea().getInside() != null && worldObj.getTotalWorldTime() % 10 == 1) {
-        //                //PLANT SAPLINGS
-        //                for (int s = getArea().getInside().size() - 1; s >= 0; s--) {
-        //                    BlockPos p = getArea().getInside().get(s);
-        //                    Block block = worldObj.getBlockState(p).getBlock();
-        //                    TileEntity tile = worldObj.getTileEntity(pos);
-        //                    if (!(tile instanceof IInventory))
-        //                        return;
-        //                    IInventory output = (IInventory) tile;
-        //                    if (block.isReplaceable(worldObj, p))
-        //                        for (int i = 0; i < output.getSizeInventory(); i++) {
-        //                            ItemStack stack = output.getStackInSlot(i);
-        //                            if (stack != null && stack.getItem() instanceof ItemBlock) {
-        //                                block = ((ItemBlock) stack.getItem()).getBlock();
-        //                                if (block.getUnlocalizedName().toLowerCase().contains("sapling") && ((BlockSapling) block).canBlockStay(worldObj, p, block.getStateFromMeta(stack.getItemDamage()))) {
-        //                                    worldObj.setBlockState(p, block.getStateFromMeta(stack.getItemDamage()), 3);
-        //                                    output.decrStackSize(i, 1);
-        //                                    break;
-        //                                }
-        //                            }
-        //                        }
-        //                }
-        //            }
-        //        }
-        //        if (!toChop.isEmpty()) {
-        //            for (BlockPos pos : toChop) {
-        //                worldObj.destroyBlock(pos, true);
-        //            }
-        //            toChop.clear();
-        //        }
     }
 
     private List<BlockPos> getPositionsInsideCorners(Pair<BlockPos, BlockPos> corners) {
@@ -280,32 +194,15 @@ public class TileEntityTreeFarm extends TileEntity implements ITickable {
         }
         return output;
     }
-    //
-    //    public void setArea(BlockPos area) {
-    //
-    //        this.area = (TileEntityAreaDefinition) worldObj.getTileEntity(area);
-    //        this.area.setFarm(this);
-    //    }
-    //
-    //    public BlockPos getAreaPo() {
-    //
-    //        return area.getPos();
-    //    }
-    //
-    //    public TileEntityAreaDefinition getArea() {
-    //
-    //        return area;
-    //    }
 
-    public boolean checkFormation() {
+    @Override
+    public boolean isSuitable(@NotNull TileEntity tile) {
+        return tile instanceof TileEntityTreeFarm;
+    }
 
-        for (BlockPos pos : multiblock) {
-//            LogHelper.info(getPos().add(pos).toString());
-            if (!(worldObj.getTileEntity(getPos().add(pos)) instanceof TileEntityTreeFarm)) {
-                return false;
-            }
-        }
-        return true;
+    @Override
+    public List<BlockPos> getMultiblock() {
+        return multiblock;
     }
 
     @Override

@@ -6,8 +6,10 @@ import java.util.Stack;
 
 import com.github.projectscion.ModInfo;
 import com.github.projectscion.common.features.tools.FeatureTool;
+import com.github.projectscion.common.util.IProvideEvent;
 import com.github.projectscion.common.util.InventoryHelper;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -20,14 +22,14 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-public class ItemChainsaw extends Item {
+public class ItemChainsaw extends Item implements IProvideEvent {
 
     public ItemChainsaw(String type) {
 
         super();
         setCreativeTab(CreativeTabs.TOOLS);
         setRegistryName(new ResourceLocation(ModInfo.MOD_ID, "chainsaw_" + type));
-        setUnlocalizedName("chainsaw_" + type);
+        setUnlocalizedName(getRegistryName().toString());
         setMaxDamage(875);
         setMaxStackSize(1);
     }

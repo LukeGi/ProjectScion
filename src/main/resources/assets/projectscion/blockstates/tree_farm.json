@@ -4,25 +4,15 @@
     "textures": {
       "all": "projectscion:blocks/tree_farm"
     },
-    "model": "minecraft:cube_all",
-    "transform": "forge:default-block"
+    "model": "cube_all",
+    "uvlock": true
   },
   "variants": {
-    "inventory": [
+    "normal": [
       {}
     ],
-    "facing": {
-      "west": {
-        "y": -90
-      },
-      "east": {
-        "y": 90
-      },
-      "north": {
-      },
-      "south": {
-        "y": 180
-      }
-    }
+    "inventory": [
+      {}
+    ]
   }
 }

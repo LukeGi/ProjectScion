@@ -26,7 +26,7 @@ public class ItemMiningTool extends Item {
 		super();
 		setCreativeTab(CreativeTabs.TOOLS);
 		setRegistryName(new ResourceLocation(ModInfo.MOD_ID, "mining_tool_" + type));
-		setUnlocalizedName("mining_tool_" + type);
+		setUnlocalizedName(getRegistryName().toString());
 		setMaxDamage((type == "iron" ? 128 : type == "diamond" ? 512 : 0));
 		setMaxStackSize(1);
 	}

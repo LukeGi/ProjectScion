@@ -9,17 +9,14 @@ public class CommonProxy {
 
 	public void preinit(FMLPreInitializationEvent event) {
 		Features.registerCongifurations(event.getSuggestedConfigurationFile());
-		Features.registerEvents();
-		Features.registerItems();
-		Features.registerBlocks();
-		Features.registerTileEntityies();
+		Features.preInit();
 	}
 
 	public void init(FMLInitializationEvent event) {
-		Features.registerRecipes();
+		Features.init();
 	}
 
 	public void postinit(FMLPostInitializationEvent event) {
-
+		Features.postInit();
 	}
 }
