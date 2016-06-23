@@ -1,0 +1,19 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "textures": {
+      "side": "projectscion:blocks/cobble_generator_side",
+      "end": "projectscion:blocks/cobble_generator_end"
+    },
+    "model": "cube_column",
+    "uvlock": true
+  },
+  "variants": {
+    "normal": [
+      {}
+    ],
+    "inventory": [
+      {}
+    ]
+  }
+}
