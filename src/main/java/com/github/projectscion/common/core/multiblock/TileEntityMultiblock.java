@@ -48,6 +48,8 @@ public abstract class TileEntityMultiblock extends TileEntity implements ITickab
                     foundFault = true;
                     break;
                 }
+            } else {
+                foundFault = true;
             }
         }
         return !foundFault;

@@ -2,7 +2,7 @@ package com.github.projectscion.common.features.treefarm;
 
 import com.github.projectscion.common.core.multiblock.TileEntityMultiblock;
 import com.github.projectscion.common.features.tools.ItemChainsaw;
-import com.mojang.realmsclient.util.Pair;
+import com.github.projectscion.common.util.LogHelper;
 import com.sun.istack.internal.NotNull;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSapling;
@@ -14,6 +14,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -34,163 +35,142 @@ public class TileEntityTreeFarm extends TileEntityMultiblock {
     static {
         multiblock = new ArrayList<>();
         BlockPos pos = new BlockPos(0, 0, 0);
-        multiblock.add(pos);
-        multiblock.add(pos.up());
-        multiblock.add(pos.up(2));
-        // Largest Circle.
-        for (int x = -3; x <= 3; x++) {
-            for (int z = -3; z <= 3; z++) {
-                multiblock.add(pos.up(3).north(z).east(x));
+        for (int i = -2; i <= 2; i++) {
+            multiblock.add(pos.add(i, 0, 0));
+            if (i != 0) {
+                multiblock.add(pos.add(0, 0, i));
             }
         }
-        for (int x = -2; x <= 2; x++) {
-            for (int z = -2; z <= 2; z++) {
-                multiblock.add(pos.up(4).north(z).east(x));
-            }
-        }
-        for (int x = -1; x <= 1; x++) {
-            for (int z = -1; z <= 1; z++) {
-                multiblock.add(pos.up(5).north(z).east(x));
-            }
-        }
-        multiblock.add(pos.up(6));
     }
 
     private ItemStackHandler internalInventory = new ItemStackHandler(27);
     private List<BlockPos> toChop = new ArrayList<>();
-    private Pair<BlockPos, BlockPos> corners;
+    private TreeFarmOperation operation = TreeFarmOperation.NONE;
+    private int scanx, scany = 0, scanz;
 
     public void save(NBTTagCompound nbt) {
 
-        boolean saveCorners = corners != null;
-        nbt.setBoolean("savedCorners", saveCorners);
-        if (saveCorners) {
-            nbt.setInteger("corner0X", corners.first().getX());
-            nbt.setInteger("corner0Y", corners.first().getY());
-            nbt.setInteger("corner0Z", corners.first().getZ());
-            nbt.setInteger("corner1X", corners.second().getX());
-            nbt.setInteger("corner1Y", corners.second().getY());
-            nbt.setInteger("corner1Z", corners.second().getZ());
-        }
+        nbt.setInteger("scanx", scanx);
+        nbt.setInteger("scany", scany);
+        nbt.setInteger("scanz", scanz);
+
         nbt.setTag("inventory", internalInventory.serializeNBT());
     }
 
     public void load(NBTTagCompound nbt) {
-
-        boolean saveCorners = nbt.getBoolean("savedCorners");
-        if (saveCorners) {
-            corners = Pair.of(new BlockPos(nbt.getInteger("corner0X"), nbt.getInteger("corner0Y"), nbt.getInteger("corner0Z")), new BlockPos(nbt.getInteger("corner1X"), nbt.getInteger("corner1Y"), nbt.getInteger("corner1Z")));
-        }
+        scanx = nbt.getInteger("scanx");
+        scany = nbt.getInteger("scany");
+        scanz = nbt.getInteger("scanz");
         internalInventory.deserializeNBT(nbt.getCompoundTag("inventory"));
     }
 
     @Override
     public void function() {
-        if (corners != null) {
-            if (getWorld().getTotalWorldTime() % 100 == 20) {
-                //SAPLINGS
-                List<BlockPos> blockPoses = getPositionsInsideCorners(corners);
-                for (BlockPos blockPos : blockPoses) {
-                    Block block = worldObj.getBlockState(blockPos).getBlock();
-                    TileEntity tile = worldObj.getTileEntity(pos);
-                    if (!(tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.DOWN))) {
-                        return;
-                    }
-                    IItemHandler output = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.DOWN);
-                    if (block.isReplaceable(worldObj, blockPos))
-                        for (int i = 0; i < output.getSlots(); i++) {
-                            ItemStack stack = output.getStackInSlot(i);
-                            if (stack != null && stack.getItem() instanceof ItemBlock) {
-                                block = ((ItemBlock) stack.getItem()).getBlock();
-                                if (block.getUnlocalizedName().toLowerCase().contains("sapling") && ((BlockSapling) block).canBlockStay(worldObj, blockPos, block.getStateFromMeta(stack.getItemDamage()))) {
-                                    worldObj.setBlockState(blockPos, block.getStateFromMeta(stack.getItemDamage()), 3);
-                                    output.extractItem(i, 1, false);
-                                    break;
+        LogHelper.info(operation.toString());
+        if (!toChop.isEmpty()) {
+            operation = TreeFarmOperation.CUTTING;
+        }
+        if (operation.equals(TreeFarmOperation.NONE)) {
+            operation = TreeFarmOperation.SCANNING;
+        }
+
+        if (operation.equals(TreeFarmOperation.CUTTING)) {
+            BlockPos blockPos = toChop.get(0);
+            toChop.remove(0);
+            worldObj.destroyBlock(blockPos, true);
+            if (toChop.isEmpty()) {
+                operation = TreeFarmOperation.SCANNING;
+            }
+            return;
+        }
+        if (operation.equals(TreeFarmOperation.SCANNING) || operation.equals(TreeFarmOperation.PLANTING)) {
+            scanx++;
+            if (scanx == 3) {
+                scanz++;
+                scanx = -2;
+                if (scanz == 3) {
+                    scanz = -2;
+                    if (operation.equals(TreeFarmOperation.SCANNING)) {
+                        // Pickup Drops
+                        AxisAlignedBB aabb = getPickupAABB();
+                        if (aabb != null) {
+                            List<ItemStack> acceptedDrops = new ArrayList<>();
+                            for (ItemStack itemStack : OreDictionary.getOres("treeSapling")) {
+                                acceptedDrops.add(itemStack);
+                            }
+                            for (ItemStack itemStack : OreDictionary.getOres("logWood")) {
+                                acceptedDrops.add(itemStack);
+                            }
+                            List<EntityItem> loots = worldObj.getEntitiesWithinAABB(EntityItem.class, aabb);
+                            EntityItem item;
+                            for (int i = loots.size() - 1; i >= 0; i--) {
+                                item = loots.get(i);
+                                boolean remove = true;
+                                for (ItemStack acceptedDrop : acceptedDrops) {
+                                    if (item.getEntityItem().getItem() == acceptedDrop.getItem()) {
+                                        remove = false;
+                                    }
+                                }
+                                if (remove) {
+                                    loots.remove(i);
+                                }
+                            }
+                            for (EntityItem loot : loots) {
+                                ItemStack stack = ItemHandlerHelper.insertItem(internalInventory, loot.getEntityItem(), false);
+                                loot.setDead();
+                                if (stack != null) {
+                                    //TODO make the thing not work
+                                    Random rand = new Random();
+                                    float dX = rand.nextFloat() * 0.8F + 0.1F;
+                                    float dY = rand.nextFloat() * 0.8F + 0.1F;
+                                    float dZ = rand.nextFloat() * 0.8F + 0.1F;
+                                    EntityItem entityItem = new EntityItem(getWorld(), pos.getX() + dX, pos.getY() + dY, pos.getZ() + dZ, stack.copy());
+                                    if (stack.hasTagCompound()) {
+                                        entityItem.getEntityItem().setTagCompound(stack.getTagCompound().copy());
+                                    }
+                                    float factor = 0.05F;
+                                    entityItem.motionX = rand.nextGaussian() * factor;
+                                    entityItem.motionY = rand.nextGaussian() * factor + 0.2F;
+                                    entityItem.motionZ = rand.nextGaussian() * factor;
+                                    getWorld().spawnEntityInWorld(entityItem);
+                                    stack.stackSize = 0;
                                 }
                             }
                         }
-                }
-            }
-            if (getWorld().getTotalWorldTime() % 100 == 40) {
-                //SCAN
-                List<BlockPos> blockPoses = getPositionsInsideCorners(corners);
-                for (BlockPos blockPos : blockPoses) {
-                    List<BlockPos> newBlockPoses = ItemChainsaw.getSortedWoodList(blockPos, worldObj);
-                    if (newBlockPoses != null) {
-                        toChop.addAll(newBlockPoses);
+                        operation = TreeFarmOperation.PLANTING;
+                    } else if (operation.equals(TreeFarmOperation.PLANTING)) {
+                        operation = TreeFarmOperation.SCANNING;
                     }
                 }
             }
-            if (getWorld().getTotalWorldTime() % 100 == 60) {
-                //PICKUP
-                AxisAlignedBB aabb = getPickupAABB();
-                if (aabb != null) {
-                    List<ItemStack> acceptedDrops = new ArrayList<>();
-                    for (ItemStack itemStack : OreDictionary.getOres("treeSapling")) {
-                        acceptedDrops.add(itemStack);
-                    }
-                    for (ItemStack itemStack : OreDictionary.getOres("logWood")) {
-                        acceptedDrops.add(itemStack);
-                    }
-                    List<EntityItem> loots = worldObj.getEntitiesWithinAABB(EntityItem.class, aabb);
-                    EntityItem item;
-                    for (int i = loots.size() - 1; i >= 0; i--) {
-                        item = loots.get(i);
-                        boolean remove = true;
-                        for (ItemStack acceptedDrop : acceptedDrops) {
-                            if (item.getEntityItem().getItem() == acceptedDrop.getItem()) {
-                                remove = false;
+            BlockPos blockPos = pos.add(scanx, 1, scanz);
+
+            if (operation.equals(TreeFarmOperation.SCANNING)) {
+                List<BlockPos> newBlockPoses = ItemChainsaw.getSortedWoodList(blockPos, worldObj);
+                if (newBlockPoses != null) {
+                    toChop.addAll(newBlockPoses);
+                }
+                return;
+            }
+            if (operation.equals(TreeFarmOperation.PLANTING)) {
+                Block block = worldObj.getBlockState(blockPos).getBlock();
+                IItemHandler output = this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.DOWN);
+                if (block.isReplaceable(worldObj, blockPos)) {
+                    for (int i = 0; i < output.getSlots(); i++) {
+                        ItemStack stack = output.getStackInSlot(i);
+                        if (stack != null && stack.getItem() instanceof ItemBlock) {
+                            block = ((ItemBlock) stack.getItem()).getBlock();
+                            if (block.getUnlocalizedName().toLowerCase().contains("sapling") && ((BlockSapling) block).canBlockStay(worldObj, blockPos, block.getStateFromMeta(stack.getItemDamage()))) {
+                                worldObj.setBlockState(blockPos, block.getStateFromMeta(stack.getItemDamage()), 3);
+                                output.extractItem(i, 1, false);
+                                break;
                             }
                         }
-                        if (remove) {
-                            loots.remove(i);
-                        }
-                    }
-                    for (EntityItem loot : loots) {
-                        ItemStack stack = ItemHandlerHelper.insertItem(internalInventory, loot.getEntityItem(), false);
-                        loot.setDead();
-                        if (stack != null) {
-                            //TODO make the thing not work
-                            Random rand = new Random();
-                            float dX = rand.nextFloat() * 0.8F + 0.1F;
-                            float dY = rand.nextFloat() * 0.8F + 0.1F;
-                            float dZ = rand.nextFloat() * 0.8F + 0.1F;
-                            EntityItem entityItem = new EntityItem(getWorld(), pos.getX() + dX, pos.getY() + dY, pos.getZ() + dZ, stack.copy());
-                            if (stack.hasTagCompound()) {
-                                entityItem.getEntityItem().setTagCompound(stack.getTagCompound().copy());
-                            }
-                            float factor = 0.05F;
-                            entityItem.motionX = rand.nextGaussian() * factor;
-                            entityItem.motionY = rand.nextGaussian() * factor + 0.2F;
-                            entityItem.motionZ = rand.nextGaussian() * factor;
-                            getWorld().spawnEntityInWorld(entityItem);
-                            stack.stackSize = 0;
-                        }
                     }
                 }
-            }
-            if (getWorld().getTotalWorldTime() % 20 == 1 && !toChop.isEmpty()) {
-                //BREAK LOGS
-                BlockPos blockPos = toChop.get(0);
-                toChop.remove(0);
-                worldObj.destroyBlock(blockPos, true);
+                return;
             }
         }
-    }
-
-    private List<BlockPos> getPositionsInsideCorners(Pair<BlockPos, BlockPos> corners) {
-
-        int x1 = corners.first().getX();
-        int x2 = corners.second().getX();
-        int z1 = corners.first().getZ();
-        int z2 = corners.second().getZ();
-        List<BlockPos> output = new ArrayList<>();
-        for (int x = x1; x <= x2; x++) {
-            for (int z = z1; z <= z2; z++) {
-                output.add(new BlockPos(x, corners.first().getY(), z));
-            }
-        }
-        return output;
     }
 
     @Override
@@ -218,17 +198,16 @@ public class TileEntityTreeFarm extends TileEntityMultiblock {
     }
 
     public AxisAlignedBB getPickupAABB() {
+        return new AxisAlignedBB(pos.getX() - 10, pos.getY() - 1, pos.getZ() - 10, pos.getX() + 10, pos.getY() + 3, pos.getZ() + 10);
+    }
 
-        if (corners != null) {
-            int x1 = corners.first().getX();
-            int x2 = corners.second().getX();
-            int z1 = corners.first().getZ();
-            int z2 = corners.second().getZ();
-            AxisAlignedBB output = new AxisAlignedBB(x1, corners.first().getY(), z1, x2, corners.first().getY(), z2);
-            return output;
-        } else {
-            return null;
-        }
+    @Override
+    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+        return capability.equals(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) || super.hasCapability(capability, facing);
+    }
+
+    @Override
+    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+        return capability.equals(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) ? (T) internalInventory : super.getCapability(capability, facing);
     }
 }
-//
