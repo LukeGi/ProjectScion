@@ -19,6 +19,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.function.BiFunction;
 
 public class ItemChainsaw extends Item implements IProvideEvent {
 
@@ -35,7 +36,7 @@ public class ItemChainsaw extends Item implements IProvideEvent {
     public static boolean breakWood(World world, EntityPlayer player, BlockPos pos, IBlockState state) {
 
         if (state.getBlock().isWood(world, pos)) {
-            List<BlockPos> wood = getSortedWoodList(pos, world);
+            List<BlockPos> wood = getSortedList(pos, world, (pos1, world1) -> world1.getBlockState(pos1).getBlock().isWood(world1, pos1));
             if (!wood.isEmpty()) {
                 if (player.isSneaking()) {
                     for (int i = 0; i < 10 && !wood.isEmpty(); i++) {
@@ -57,37 +58,38 @@ public class ItemChainsaw extends Item implements IProvideEvent {
         return false;
     }
 
-    public static List<BlockPos> getSortedWoodList(BlockPos pos, World world) {
-
-        if (world.getBlockState(pos).getBlock().isWood(world, pos)) {
-            List<BlockPos> wood = new ArrayList<>();
+    public static List<BlockPos> getSortedList(BlockPos start, World world, BiFunction<BlockPos, World, Boolean> valid) {
+        if (valid.apply(start, world)) {
+            List<BlockPos> returner = new ArrayList<>();
             Stack<BlockPos> toVisit = new Stack<>();
-            toVisit.push(pos);
+            toVisit.push(start);
             while (!toVisit.isEmpty()) {
                 BlockPos current = toVisit.pop();
-                wood.add(current);
+                returner.add(current);
                 for (int i = -4; i < 5; i++) {
                     for (int j = -4; j < 5; j++) {
                         for (int k = -4; k < 5; k++) {
                             BlockPos element = current.add(i, j, k);
-                            IBlockState elementState = world.getBlockState(element);
-                            if (!wood.contains(element) && !toVisit.contains(element) && elementState.getBlock().isWood(world, element)) {
+                            if (!returner.contains(element) && !toVisit.contains(element) && valid.apply(element, world)) {
                                 toVisit.push(element);
                             }
                         }
                     }
                 }
+                if (returner.size() > 512) { //TODO: make this number configurable
+                    return null;
+                }
             }
-            wood.sort((a, b) -> {
-                if (a.distanceSq(pos) < b.distanceSq(pos)) {
+            returner.sort((a, b) -> {
+                if (a.distanceSq(start) < b.distanceSq(start)) {
                     return 1;
-                } else if (a.distanceSq(pos) == b.distanceSq(pos)) {
+                } else if (a.distanceSq(start) == b.distanceSq(start)) {
                     return 0;
-                } else if (a.distanceSq(pos) > b.distanceSq(pos))
+                } else if (a.distanceSq(start) > b.distanceSq(start))
                     return -1;
                 return 0;
             });
-            return wood;
+            return returner;
         }
         return null;
     }

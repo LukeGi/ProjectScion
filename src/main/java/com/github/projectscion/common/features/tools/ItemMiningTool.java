@@ -93,7 +93,10 @@ public class ItemMiningTool extends Item {
             flag |= InventoryHelper.breakBlockIntoPlayerInv(worldIn, blockPos, stack, (EntityPlayer) entityLiving);
         }
         if (flag) {
-            stack.damageItem(1, entityLiving);
+            stack.attemptDamageItem(1, worldIn.rand);
+            if (stack.getItemDamage() == stack.getMaxDamage()) {
+                entityLiving.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(FeatureTool.tool_handle, 1));
+            }
             return true;
         } else {
             return true;

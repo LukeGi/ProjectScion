@@ -9,6 +9,7 @@ public class FeatureTool extends Feature {
     public static final ItemMiningTool mining_tool_diamond = new ItemMiningTool("diamond");
     public static final ItemChainsaw chainsaw_iron = new ItemChainsaw("iron");
     public static final ItemAreaDesignator area_designator = new ItemAreaDesignator();
+    public static final ItemPickInsta instant_pickaxe = new ItemPickInsta();
 
     @Override
     public void preInit() {
@@ -17,5 +18,6 @@ public class FeatureTool extends Feature {
         registerFeature(mining_tool_diamond);
         registerFeature(chainsaw_iron);
         registerFeature(area_designator);
+        registerFeature(instant_pickaxe);
     }
 }
