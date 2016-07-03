@@ -120,7 +120,7 @@ public class ItemChainsaw extends Item implements IProvideEvent {
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void startBreak(net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed event) {
 
-        if (event.getEntityPlayer().getHeldItemMainhand() != null && event.getEntityPlayer().getHeldItemMainhand().getItem() == FeatureTool.chainsaw_iron) {
+        if (event.getEntityPlayer().getHeldItemMainhand() != null && event.getEntityPlayer().getHeldItemMainhand().getItem() == FeatureTool.CHAINSAW) {
             if (event.getEntityPlayer().worldObj.getBlockState(event.getPos()).getBlock().isWood(event.getEntityPlayer().worldObj, event.getPos())) {
                 if (event.getEntityPlayer().isSneaking()) {
                     event.setNewSpeed(event.getOriginalSpeed() * 0.2F);
@@ -132,7 +132,7 @@ public class ItemChainsaw extends Item implements IProvideEvent {
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void breakBlock(BlockEvent.BreakEvent event) {
 
-        if (event.getPlayer().getHeldItemMainhand() != null && event.getPlayer().getHeldItemMainhand().getItem() == FeatureTool.chainsaw_iron) {
+        if (event.getPlayer().getHeldItemMainhand() != null && event.getPlayer().getHeldItemMainhand().getItem() == FeatureTool.CHAINSAW) {
             event.setCanceled(breakWood(event.getWorld(), event.getPlayer(), event.getPos(), event.getState()));
         }
     }

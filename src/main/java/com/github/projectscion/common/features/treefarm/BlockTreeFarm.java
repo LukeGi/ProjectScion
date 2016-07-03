@@ -21,8 +21,6 @@ public class BlockTreeFarm extends BlockMultiblock {
         setUnlocalizedName(getRegistryName().toString());
     }
 
-    //TODO: add the method that drops a stack on rightclick, and drops 1 item on shift rightclick, and drop the entire inventory on ctrl rightclick.
-
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta) {
 

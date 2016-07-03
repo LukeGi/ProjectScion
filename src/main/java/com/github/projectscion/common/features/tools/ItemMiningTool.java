@@ -1,6 +1,7 @@
 package com.github.projectscion.common.features.tools;
 
 import com.github.projectscion.ModInfo;
+import com.github.projectscion.common.util.IProvideEvent;
 import com.github.projectscion.common.util.InventoryHelper;
 import net.minecraft.block.BlockObsidian;
 import net.minecraft.block.BlockTorch;
@@ -9,19 +10,26 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.server.SPacketBlockBreakAnim;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
-public class ItemMiningTool extends Item {
+import java.util.ArrayList;
+import java.util.List;
+
+public class ItemMiningTool extends Item implements IProvideEvent {
     public ItemMiningTool(String type) {
         super();
         setCreativeTab(CreativeTabs.TOOLS);
@@ -95,7 +103,7 @@ public class ItemMiningTool extends Item {
         if (flag) {
             stack.attemptDamageItem(1, worldIn.rand);
             if (stack.getItemDamage() == stack.getMaxDamage()) {
-                entityLiving.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(FeatureTool.tool_handle, 1));
+                entityLiving.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(FeatureTool.TOOL_HANDLE, 1));
             }
             return true;
         } else {
@@ -107,6 +115,30 @@ public class ItemMiningTool extends Item {
     public boolean onBlockDestroyed(ItemStack stack, World worldIn, IBlockState state, BlockPos pos,
                                     EntityLivingBase entityLiving) {
         return handleBlockDestroyed(stack, worldIn, pos, entityLiving);
+    }
+
+    @Override
+    public boolean onBlockStartBreak(ItemStack itemstack, BlockPos pos, EntityPlayer player) {
+        // get blocks, send packet saying breaking them.
+        BlockPos[] toBreak = null;
+        EnumFacing facing = player.rayTrace(10, 1F).sideHit;
+        if (facing.getAxis().equals(EnumFacing.Axis.Z)) {
+            toBreak = new BlockPos[]{pos, pos.up(), pos.down(), pos.east(), pos.west(), pos.up().west(),
+                    pos.up().east(), pos.down().west(), pos.down().east()};
+        } else if (facing.getAxis().equals(EnumFacing.Axis.X)) {
+            toBreak = new BlockPos[]{pos, pos.up(), pos.down(), pos.north(), pos.south(), pos.up().north(),
+                    pos.up().south(), pos.down().north(), pos.down().south()};
+        } else if (facing.getAxis().equals(EnumFacing.Axis.Y)) {
+            toBreak = new BlockPos[]{pos, pos.north(), pos.east(), pos.south(), pos.west(), pos.north().east(),
+                    pos.south().east(), pos.south().west(), pos.north().west()};
+        }
+        if (!player.worldObj.isRemote) {
+            for (BlockPos npos : toBreak) {
+                SPacketBlockBreakAnim packet = new SPacketBlockBreakAnim(player.getEntityId(), npos, 15);
+                ((EntityPlayerMP) player).connection.sendPacket(packet);
+            }
+        }
+        return super.onBlockStartBreak(itemstack, pos, player);
     }
 
     @Override
@@ -141,5 +173,27 @@ public class ItemMiningTool extends Item {
 
         return stack.getItem().getUnlocalizedName().contains("iron") ? 2
                 : stack.getItem().getUnlocalizedName().contains("diamond") ? 3 : -1;
+    }
+
+    @SubscribeEvent
+    public void startbreak(PlayerEvent.BreakSpeed event) {
+        ItemStack item = event.getEntityPlayer().getHeldItemMainhand();
+        if (item != null && item.getItem() != null && item.getItem() instanceof ItemMiningTool) {
+            List<BlockPos> blockPoses = new ArrayList<>();
+            for (int i = -1; i <= 1; i++) {
+                for (int j = -1; j <= 1; j++) {
+                    for (int k = -1; k <= 1; k++) {
+                        blockPoses.add(event.getPos().add(i, j, k));
+                    }
+                }
+            }
+            int average = 0;
+            World world = event.getEntityPlayer().getEntityWorld();
+            for (BlockPos pos : blockPoses) {
+                average += world.getBlockState(pos).getBlockHardness(world, pos) * 5;
+            }
+            average /= blockPoses.size();
+            event.setNewSpeed(average);
+        }
     }
 }

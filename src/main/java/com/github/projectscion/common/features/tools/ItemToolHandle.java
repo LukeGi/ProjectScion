@@ -18,6 +18,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.Random;
+
 public class ItemToolHandle extends Item implements IProvideEvent {
 
     public ItemToolHandle() {
@@ -30,19 +32,14 @@ public class ItemToolHandle extends Item implements IProvideEvent {
         setHasSubtypes(true);
     }
 
-    public static void changeItemTo(World worldIn, BlockPos pos, ItemStack stack, ItemStack item, int i) {
+    public static void changeItemTo(World worldIn, BlockPos pos, EntityPlayer player, ItemStack item, int i) {
 
-        stack.setItem(item.getItem());
-        stack.stackSize = item.stackSize;
-        worldIn.destroyBlock(pos, false);
-        if (i >= 1) {
-            worldIn.destroyBlock(pos.up(), false);
-        }
-        if (i >= 2) {
-            worldIn.destroyBlock(pos.up(2), false);
-        }
-        for (int j = 0; j < (5 * i) + 5; j++) {
-            worldIn.weatherEffects.add(new EntityLightningBolt(worldIn, pos.getX(), pos.getY(), pos.getZ(), true));
+        player.setHeldItem(EnumHand.MAIN_HAND, item);
+        BlockPos p;
+        for (int j = 0; i >= j; j++) {
+            p = pos.up(j);
+            worldIn.destroyBlock(p, false);
+            worldIn.addWeatherEffect(new EntityLightningBolt(worldIn, p.getX() + 0.5, p.getY(), p.getZ() + 0.5, (new Random()).nextBoolean()));
         }
     }
 
@@ -51,41 +48,17 @@ public class ItemToolHandle extends Item implements IProvideEvent {
 
         if (worldIn.getBlockState(pos).getBlock() == Blocks.IRON_BLOCK) {
             Block above = worldIn.getBlockState(pos.up()).getBlock();
-            if (above == Blocks.DIAMOND_BLOCK) {
-                /*
-                 * above = worldIn.getBlockState(pos.up(2)).getBlock();
-				 * if (above.isWood(worldIn, pos.up(2))) {
-				 * stack.setItem(ModItems.IRON_CHAINSAW.getItem()); return
-				 * EnumActionResult.SUCCESS; } else
-				 */
-                // if (above == Blocks.STONE) {
-                // changeItemTo(worldIn, pos, stack,
-                // ModItems.DIAMOND_MINING_TOOL.getStack(1), 2);
-                // return EnumActionResult.SUCCESS;
-                // }TODO : add this again
-            } else {
-                if (above.isWood(worldIn, pos.up())) {
-                    changeItemTo(worldIn, pos, stack, new ItemStack(FeatureTool.chainsaw_iron, 1), 1);
-                    return EnumActionResult.SUCCESS;
-                } else if (above == Blocks.STONE) {
-                    changeItemTo(worldIn, pos, stack, new ItemStack(FeatureTool.mining_tool_iron, 1), 1);
-                    return EnumActionResult.SUCCESS;
+            if (above.equals(Blocks.DIAMOND_BLOCK)) {
+                above = worldIn.getBlockState(pos.up(2)).getBlock();
+                if (above.equals(Blocks.STONE)) {
+                    changeItemTo(worldIn, pos, playerIn, new ItemStack(FeatureTool.MINING_TOOL_DIAMOND, 1), 2);
                 }
+            } else if (above.isWood(worldIn, pos.up())) {
+                changeItemTo(worldIn, pos, playerIn, new ItemStack(FeatureTool.CHAINSAW, 1), 1);
+            } else if (above.equals(Blocks.STONE)) {
+                changeItemTo(worldIn, pos, playerIn, new ItemStack(FeatureTool.MINING_TOOL_IRON, 1), 1);
             }
-            // if (above == ModBlocks.UNOBTAINABLE_MATTER_BLOCK.getBlock()) {
-            // if (worldIn.getBlockState(pos.up().up()).getBlock() ==
-            // ModBlocks.UNOBTAINABLE_MATTER_BLOCK.getBlock()) {
-            // changeItemTo(worldIn, pos, stack,
-            // ModItems.UNOBTAINABLE_SWORD.getStack(1), 1);
-            // }
-            // } TODO: add this again
         }
-        // if (worldIn.getBlockState(pos).getBlock() ==
-        // ModBlocks.AREA_DEFINITION.getBlock()) {
-        // changeItemTo(worldIn, pos, stack,
-        // ModItems.AREA_DESIGNATOR.getStack(1), 0);
-        // return EnumActionResult.SUCCESS;
-        // } TODO: add this again
         return EnumActionResult.PASS;
     }
 
@@ -95,18 +68,9 @@ public class ItemToolHandle extends Item implements IProvideEvent {
         ItemStack heldStack = event.getEntityPlayer().getHeldItemMainhand();
         if (heldStack != null && heldStack.getItem() == Items.STICK) {
             if (event.getWorld().getBlockState(event.getPos()).getBlock() == Blocks.LAPIS_BLOCK && heldStack.stackSize == 1) {
-                changeItemTo(event.getWorld(), event.getPos(), heldStack, new ItemStack(FeatureTool.tool_handle, 1), 0);
+                changeItemTo(event.getWorld(), event.getPos(), event.getEntityPlayer(), new ItemStack(FeatureTool.TOOL_HANDLE, 1), 0);
                 event.setCanceled(true);
             }
         }
-        // if (heldStack != null && heldStack.getItem() ==
-        // ModItems.DIAMOND_ROD.getItem()) {
-        // if (event.getWorld().getBlockState(event.getPos()).getBlock() ==
-        // ModBlocks.COMPRESSED_OBSIDIAN.getBlock()
-        // && heldStack.stackSize == 1) {
-        // changeItemTo(event.getWorld(), event.getPos(), heldStack,
-        // ModItems.TOOL_HANDLE.getStack(1, 1), 0);
-        // }
-        // } TODO: add this again
     }
 }

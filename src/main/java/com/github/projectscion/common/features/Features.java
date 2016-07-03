@@ -1,6 +1,9 @@
 package com.github.projectscion.common.features;
 
 import com.github.projectscion.common.features.cobbleGenerator.FeatureCobbleGenerator;
+import com.github.projectscion.common.features.duping.FeatureDuping;
+import com.github.projectscion.common.features.magic.FeatureMagic;
+import com.github.projectscion.common.features.storage.FeatureStorage;
 import com.github.projectscion.common.features.tools.FeatureTool;
 import com.github.projectscion.common.features.treefarm.FeatureTreeFarm;
 
@@ -16,6 +19,9 @@ public class Features {
         addFeature(new FeatureTool());
         addFeature(new FeatureTreeFarm());
         addFeature(new FeatureCobbleGenerator());
+        addFeature(new FeatureStorage());
+        addFeature(new FeatureDuping());
+        addFeature(new FeatureMagic());
         //addFeature(new FeatureRandomThings());
     }
 
