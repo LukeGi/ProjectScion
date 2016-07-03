@@ -23,33 +23,33 @@ import javax.annotation.Nullable;
  */
 public class BlockCobbleGenerator extends BlockMultiblock {
 
-    public BlockCobbleGenerator() {
-        super(Material.ROCK);
-        setRegistryName(ModInfo.MOD_ID, "cobble_generator");
-        setUnlocalizedName(getRegistryName().toString());
-        setCreativeTab(CreativeTabs.REDSTONE);
-    }
+ public BlockCobbleGenerator() {
+  super(Material.ROCK);
+  setRegistryName(ModInfo.MOD_ID, "cobble_generator");
+  setUnlocalizedName(getRegistryName().toString());
+  setCreativeTab(CreativeTabs.REDSTONE);
+ }
 
-    @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
-        if (Platform.isServer() && playerIn.isSneaking()) {
-            TileEntity tile = worldIn.getTileEntity(pos);
-            if (tile != null && tile instanceof TileEntityCobbleGenerator) {
-                TileEntityCobbleGenerator cobbleGenerator = (TileEntityCobbleGenerator) tile;
-                ItemStack cobble = cobbleGenerator.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.DOWN).extractItem(0, 64, false);
-                if (cobble != null && cobble.stackSize > 0) {
-                    EntityItem cobbleItem = new EntityItem(playerIn.worldObj, playerIn.posX, playerIn.posY, playerIn.posZ, cobble);
-                    cobbleItem.setVelocity(0, 0, 0);
-                    cobbleItem.setPickupDelay(0);
-                    worldIn.spawnEntityInWorld(cobbleItem);
-                }
-            }
-        }
-        return super.onBlockActivated(worldIn, pos, state, playerIn, hand, heldItem, side, hitX, hitY, hitZ);
+ @Override
+ public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
+  if (Platform.isServer() && playerIn.isSneaking()) {
+   TileEntity tile = worldIn.getTileEntity(pos);
+   if (tile != null && tile instanceof TileEntityCobbleGenerator) {
+    TileEntityCobbleGenerator cobbleGenerator = (TileEntityCobbleGenerator) tile;
+    ItemStack cobble = cobbleGenerator.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.DOWN).extractItem(0, 64, false);
+    if (cobble != null && cobble.stackSize > 0) {
+     EntityItem cobbleItem = new EntityItem(playerIn.worldObj, playerIn.posX, playerIn.posY, playerIn.posZ, cobble);
+     cobbleItem.setVelocity(0, 0, 0);
+     cobbleItem.setPickupDelay(0);
+     worldIn.spawnEntityInWorld(cobbleItem);
     }
+   }
+  }
+  return super.onBlockActivated(worldIn, pos, state, playerIn, hand, heldItem, side, hitX, hitY, hitZ);
+ }
 
-    @Override
-    public TileEntity createNewTileEntity(World worldIn, int meta) {
-        return new TileEntityCobbleGenerator();
-    }
+ @Override
+ public TileEntity createNewTileEntity(World worldIn, int meta) {
+  return new TileEntityCobbleGenerator();
+ }
 }

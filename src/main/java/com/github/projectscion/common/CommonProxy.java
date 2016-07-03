@@ -7,16 +7,16 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 public class CommonProxy {
 
-    public void preinit(FMLPreInitializationEvent event) {
-        Features.registerCongifurations(event.getSuggestedConfigurationFile());
-        Features.preInit();
-    }
+ public void preinit(FMLPreInitializationEvent event) {
+  Features.registerCongifurations(event.getSuggestedConfigurationFile());
+  Features.preInit();
+ }
 
-    public void init(FMLInitializationEvent event) {
-        Features.init();
-    }
+ public void init(FMLInitializationEvent event) {
+  Features.init();
+ }
 
-    public void postinit(FMLPostInitializationEvent event) {
-        Features.postInit();
-    }
+ public void postinit(FMLPostInitializationEvent event) {
+  Features.postInit();
+ }
 }

@@ -7,10 +7,10 @@ import com.github.projectscion.common.features.Feature;
  */
 public class FeatureCobbleGenerator extends Feature {
 
-    public static final BlockCobbleGenerator cobble_generator = new BlockCobbleGenerator();
+ public static final BlockCobbleGenerator cobble_generator = new BlockCobbleGenerator();
 
-    @Override
-    public void preInit() {
-        registerFeature(cobble_generator, TileEntityCobbleGenerator.class);
-    }
+ @Override
+ public void preInit() {
+  registerFeature(cobble_generator, TileEntityCobbleGenerator.class);
+ }
 }

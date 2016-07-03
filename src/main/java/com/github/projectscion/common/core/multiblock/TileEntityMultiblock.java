@@ -13,132 +13,132 @@ import java.util.List;
  */
 public abstract class TileEntityMultiblock extends TileEntity implements ITickable {
 
-    private boolean isMaster, hasMaster;
-    private int masterX, masterY, masterZ;
+ private boolean isMaster, hasMaster;
+ private int masterX, masterY, masterZ;
 
-    @Override
-    public void update() {
-        if (!getWorld().isRemote) {
-            if (hasMaster()) {
-                if (isMaster()) {
-                    function();
-                }
-            } else {
-                if (checkMuliblockForm()) {
-                    setupStructure();
-                }
-            }
-        }
+ @Override
+ public void update() {
+  if (!getWorld().isRemote) {
+   if (hasMaster()) {
+    if (isMaster()) {
+     function();
     }
-
-    public boolean checkMuliblockForm() {
-        boolean foundFault = false;
-
-        List<BlockPos> multiblock = getMultiblock();
-        for (BlockPos relativeScanPos : multiblock) {
-            BlockPos scanPos = relativeScanPos.add(getPos());
-            TileEntity tile = getWorld().getTileEntity(scanPos);
-            if (tile != null && isSuitable(tile)) {
-                if (this.isMaster()) {
-                    if (!((TileEntityMultiblock) tile).hasMaster()) {
-                        foundFault = true;
-                        break;
-                    }
-                } else if (((TileEntityMultiblock) tile).hasMaster()) {
-                    foundFault = true;
-                    break;
-                }
-            } else {
-                foundFault = true;
-            }
-        }
-        return !foundFault;
+   } else {
+    if (checkMuliblockForm()) {
+     setupStructure();
     }
+   }
+  }
+ }
 
-    public void setupStructure() {
-        List<BlockPos> multiblock = getMultiblock();
-        for (BlockPos relativeScanPos : multiblock) {
-            BlockPos scanPos = relativeScanPos.add(getPos());
-            TileEntity tile = worldObj.getTileEntity(scanPos);
-            boolean master = (scanPos.getX() == getPos().getX() && scanPos.getY() == getPos().getY() && scanPos.getZ() == getPos().getZ());
-            if (tile != null && (tile instanceof TileEntityMultiblock)) {
-                ((TileEntityMultiblock) tile).setMasterPos(getPos());
-                ((TileEntityMultiblock) tile).setHasMaster(true);
-                ((TileEntityMultiblock) tile).setMaster(master);
-            }
-        }
+ public boolean checkMuliblockForm() {
+  boolean foundFault = false;
+
+  List<BlockPos> multiblock = getMultiblock();
+  for (BlockPos relativeScanPos : multiblock) {
+   BlockPos scanPos = relativeScanPos.add(getPos());
+   TileEntity tile = getWorld().getTileEntity(scanPos);
+   if (tile != null && isSuitable(tile)) {
+    if (this.isMaster()) {
+     if (!((TileEntityMultiblock) tile).hasMaster()) {
+      foundFault = true;
+      break;
+     }
+    } else if (((TileEntityMultiblock) tile).hasMaster()) {
+     foundFault = true;
+     break;
     }
+   } else {
+    foundFault = true;
+   }
+  }
+  return !foundFault;
+ }
 
-    public void reset() {
-        masterX = 0;
-        masterY = 0;
-        masterZ = 0;
-        hasMaster = false;
-        isMaster = false;
-    }
+ public void setupStructure() {
+  List<BlockPos> multiblock = getMultiblock();
+  for (BlockPos relativeScanPos : multiblock) {
+   BlockPos scanPos = relativeScanPos.add(getPos());
+   TileEntity tile = worldObj.getTileEntity(scanPos);
+   boolean master = (scanPos.getX() == getPos().getX() && scanPos.getY() == getPos().getY() && scanPos.getZ() == getPos().getZ());
+   if (tile != null && (tile instanceof TileEntityMultiblock)) {
+    ((TileEntityMultiblock) tile).setMasterPos(getPos());
+    ((TileEntityMultiblock) tile).setHasMaster(true);
+    ((TileEntityMultiblock) tile).setMaster(master);
+   }
+  }
+ }
 
-    public boolean checkForMaster() {
-        TileEntity tile = worldObj.getTileEntity(new BlockPos(masterX, masterY, masterZ));
-        return (tile != null && isSuitable(tile));
-    }
+ public void reset() {
+  masterX = 0;
+  masterY = 0;
+  masterZ = 0;
+  hasMaster = false;
+  isMaster = false;
+ }
 
-    public void resetStructure() {
-        List<BlockPos> multiblock = getMultiblock();
-        for (BlockPos relativeScanPos : multiblock) {
-            BlockPos scanPos = relativeScanPos.add(getPos());
-            TileEntity tile = worldObj.getTileEntity(scanPos);
-            if (tile != null && isSuitable(tile)) {
-                ((TileEntityMultiblock) tile).reset();
-            }
-        }
-    }
+ public boolean checkForMaster() {
+  TileEntity tile = worldObj.getTileEntity(new BlockPos(masterX, masterY, masterZ));
+  return (tile != null && isSuitable(tile));
+ }
 
-    /**
-     * This method should return true if tile instanceof Class.
-     *
-     * @param tile - the tile to be judged.
-     * @return tile instanceof Class
-     */
-    public abstract boolean isSuitable(@NotNull TileEntity tile);
+ public void resetStructure() {
+  List<BlockPos> multiblock = getMultiblock();
+  for (BlockPos relativeScanPos : multiblock) {
+   BlockPos scanPos = relativeScanPos.add(getPos());
+   TileEntity tile = worldObj.getTileEntity(scanPos);
+   if (tile != null && isSuitable(tile)) {
+    ((TileEntityMultiblock) tile).reset();
+   }
+  }
+ }
 
-    public abstract List<BlockPos> getMultiblock();
+ /**
+  * This method should return true if tile instanceof Class.
+  *
+  * @param tile - the tile to be judged.
+  * @return tile instanceof Class
+  */
+ public abstract boolean isSuitable(@NotNull TileEntity tile);
 
-    public abstract void function();
+ public abstract List<BlockPos> getMultiblock();
 
-    @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+ public abstract void function();
 
-        return super.writeToNBT(compound);
-    }
+ @Override
+ public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 
-    @Override
-    public void readFromNBT(NBTTagCompound compound) {
-        super.readFromNBT(compound);
-    }
+  return super.writeToNBT(compound);
+ }
 
-    public boolean isMaster() {
-        return isMaster;
-    }
+ @Override
+ public void readFromNBT(NBTTagCompound compound) {
+  super.readFromNBT(compound);
+ }
 
-    public void setMaster(boolean master) {
-        isMaster = master;
-    }
+ public boolean isMaster() {
+  return isMaster;
+ }
 
-    public boolean hasMaster() {
-        return hasMaster;
-    }
+ public void setMaster(boolean master) {
+  isMaster = master;
+ }
 
-    public void setHasMaster(boolean hasMaster) {
-        this.hasMaster = hasMaster;
-    }
+ public boolean hasMaster() {
+  return hasMaster;
+ }
 
-    public BlockPos getMasterPos() {
-        return new BlockPos(masterX, masterY, masterZ);
-    }
+ public void setHasMaster(boolean hasMaster) {
+  this.hasMaster = hasMaster;
+ }
 
-    public void setMasterPos(BlockPos master) {
-        masterX = master.getX();
-        masterY = master.getY();
-        masterZ = master.getZ();
-    }
+ public BlockPos getMasterPos() {
+  return new BlockPos(masterX, masterY, masterZ);
+ }
+
+ public void setMasterPos(BlockPos master) {
+  masterX = master.getX();
+  masterY = master.getY();
+  masterZ = master.getZ();
+ }
 }

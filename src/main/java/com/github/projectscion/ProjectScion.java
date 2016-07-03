@@ -12,24 +12,24 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 @Mod(modid = ModInfo.MOD_ID, name = ModInfo.MOD_NAME, version = ModInfo.VERSION_BUILD)
 public class ProjectScion {
 
-    @Instance
-    public static ProjectScion INSTANCE;
+ @Instance
+ public static ProjectScion INSTANCE;
 
-    @SidedProxy(clientSide = ModInfo.CLIENT_PROXY_CLASS, serverSide = ModInfo.SERVER_PROXY_CLASS)
-    public static CommonProxy proxy;
+ @SidedProxy(clientSide = ModInfo.CLIENT_PROXY_CLASS, serverSide = ModInfo.SERVER_PROXY_CLASS)
+ public static CommonProxy proxy;
 
-    @EventHandler
-    public void preinit(FMLPreInitializationEvent event) {
-        proxy.preinit(event);
-    }
+ @EventHandler
+ public void preinit(FMLPreInitializationEvent event) {
+  proxy.preinit(event);
+ }
 
-    @EventHandler
-    public void init(FMLInitializationEvent event) {
-        proxy.init(event);
-    }
+ @EventHandler
+ public void init(FMLInitializationEvent event) {
+  proxy.init(event);
+ }
 
-    @EventHandler
-    public void postinit(FMLPostInitializationEvent event) {
-        proxy.postinit(event);
-    }
+ @EventHandler
+ public void postinit(FMLPostInitializationEvent event) {
+  proxy.postinit(event);
+ }
 }

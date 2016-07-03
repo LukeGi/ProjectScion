@@ -13,15 +13,15 @@ import net.minecraft.world.World;
  * Created by blue on 03/07/16.
  */
 public class ItemMovingThing extends Item {
-    public ItemMovingThing() {
-        setRegistryName(ModInfo.MOD_ID, "moving_thing");
-        setUnlocalizedName(getRegistryName().getResourcePath());
-        setCreativeTab(CreativeTabs.MISC);
-    }
+ public ItemMovingThing() {
+  setRegistryName(ModInfo.MOD_ID, "moving_thing");
+  setUnlocalizedName(getRegistryName().getResourcePath());
+  setCreativeTab(CreativeTabs.MISC);
+ }
 
-    @Override
-    public ActionResult<ItemStack> onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, EnumHand hand) {
+ @Override
+ public ActionResult<ItemStack> onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, EnumHand hand) {
 
-        return super.onItemRightClick(itemStackIn, worldIn, playerIn, hand);
-    }
+  return super.onItemRightClick(itemStackIn, worldIn, playerIn, hand);
+ }
 }

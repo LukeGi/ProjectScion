@@ -6,11 +6,11 @@ import net.minecraft.util.IStringSerializable;
  * Created by Blue <boo122333@gmail.com>.
  */
 public enum EnumHandleProperty implements IStringSerializable {
-    BASIC, ADVANCED;
+ BASIC, ADVANCED;
 
-    @Override
-    public String getName() {
+ @Override
+ public String getName() {
 
-        return this.name();
-    }
+  return this.name();
+ }
 }
