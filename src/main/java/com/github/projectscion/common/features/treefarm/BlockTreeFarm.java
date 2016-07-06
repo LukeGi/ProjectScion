@@ -13,17 +13,17 @@ import net.minecraft.world.World;
  */
 public class BlockTreeFarm extends BlockMultiblock {
 
- public BlockTreeFarm() {
+    public BlockTreeFarm() {
 
-  super(Material.IRON);
-  setCreativeTab(CreativeTabs.REDSTONE);
-  setRegistryName(new ResourceLocation(ModInfo.MOD_ID, "tree_farm"));
-  setUnlocalizedName(getRegistryName().toString());
- }
+        super(Material.IRON);
+        setCreativeTab(CreativeTabs.REDSTONE);
+        setRegistryName(new ResourceLocation(ModInfo.MOD_ID, "tree_farm"));
+        setUnlocalizedName(getRegistryName().toString());
+    }
 
- @Override
- public TileEntity createNewTileEntity(World worldIn, int meta) {
+    @Override
+    public TileEntity createNewTileEntity(World worldIn, int meta) {
 
-  return new TileEntityTreeFarm();
- }
+        return new TileEntityTreeFarm();
+    }
 }
