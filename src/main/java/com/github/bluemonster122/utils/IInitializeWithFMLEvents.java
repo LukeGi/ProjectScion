@@ -5,9 +5,9 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 public interface IInitializeWithFMLEvents {
-    void preInit(FMLPreInitializationEvent event);
+	void init(FMLInitializationEvent event);
 
-    void init(FMLInitializationEvent event);
+	void postInit(FMLPostInitializationEvent event);
 
-    void postInit(FMLPostInitializationEvent event);
+	void preInit(FMLPreInitializationEvent event);
 }
