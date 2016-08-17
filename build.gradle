@@ -16,11 +16,11 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 version = "1.0"
-group = "com.github.projectscion"
-archivesBaseName = "projectscion"
+group = "com.github.bluemonster122"
+archivesBaseName = "Project Scion"
 
 minecraft {
-    version = "1.10.2-12.18.0.2005-1.10.0"
+    version = "1.10.2-12.18.1.2065"
 
     runDir = "run"
     makeObfSourceJar = false
