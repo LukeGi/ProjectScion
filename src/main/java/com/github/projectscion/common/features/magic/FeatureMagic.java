@@ -7,10 +7,12 @@ import com.github.projectscion.common.features.Feature;
  */
 public class FeatureMagic extends Feature {
     public static final BlockMagicDoor MAGIC_DOOR = new BlockMagicDoor();
+    public static final BlockFertileSand FERTILE_SAND = new BlockFertileSand();
     public static final ItemMovingThing MOVING_THING = new ItemMovingThing();
 
     @Override
     public void preInit() {
         registerFeature(MAGIC_DOOR, BlockMagicDoor.TileEntityMagicDoor.class);
+        registerFeature(FERTILE_SAND);
     }
 }
