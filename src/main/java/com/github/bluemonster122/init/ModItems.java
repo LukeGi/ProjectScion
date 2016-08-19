@@ -16,7 +16,11 @@ public class ModItems implements IRegister {
 
 	@Override
 	public void register() {
-		ITEMS.forEach(ItemBasePS::register);
+		registerItems();
+	}
+
+	public void registerItems() {
+		ITEMS.parallelStream().forEach(ItemBasePS::register);
 	}
 
 }

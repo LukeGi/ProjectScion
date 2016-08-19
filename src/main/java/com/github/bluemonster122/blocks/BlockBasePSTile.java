@@ -16,9 +16,7 @@ public abstract class BlockBasePSTile extends BlockBasePS implements ITileEntity
 
 	protected abstract Class<? extends TileEntity> getTEClass();
 
-	@Override
-	public void register() {
-		super.register();
+	public void registerTileEntity() {
 		GameRegistry.registerTileEntity(getTEClass(), getRegistryName().getResourcePath());
 	}
 }

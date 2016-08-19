@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.github.bluemonster122.ProjectScion;
 import com.github.bluemonster122.blocks.BlockBasePS;
+import com.github.bluemonster122.blocks.BlockBasePSTile;
 import com.github.bluemonster122.utils.IRegister;
 import com.github.bluemonster122.utils.IRegisterRenderer;
 
@@ -17,12 +18,32 @@ public class ModBlocks implements IRegister, IRegisterRenderer {
 
 	@Override
 	public void register() {
-		BLOCKS.forEach(BlockBasePS::register);
+		registerBlocks();
+		registerItemBlocks();
+		registerTileEntities();
+	}
+
+	private void registerBlocks() {
+		BLOCKS.parallelStream().forEach(BlockBasePS::registerBlock);
+	}
+
+	private void registerItemBlockRenders() {
+		BLOCKS.parallelStream().forEach(BlockBasePS::registerItemBlockRenders);
+	}
+
+	private void registerItemBlocks() {
+		BLOCKS.parallelStream().forEach(BlockBasePS::registerItemBlock);
 	}
 
 	@Override
 	public void registerRenders() {
-		BLOCKS.forEach(BlockBasePS::registerRenders);
+		registerItemBlockRenders();
 	}
 
+	private void registerTileEntities() {
+		BLOCKS.parallelStream().forEach(block -> {
+			if (block instanceof BlockBasePSTile)
+				((BlockBasePSTile) block).registerTileEntity();
+		});
+	}
 }
